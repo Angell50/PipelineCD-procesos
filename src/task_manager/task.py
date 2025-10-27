@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 from .exceptions import ValidationError
 
@@ -30,38 +30,34 @@ class TaskPriority(Enum):
 class Task:
     """
     Represents a task with validation and business logic.
-
-    Attributes:
-        task_id: Unique identifier for the task
-        title: Task title (1-200 characters)
-        description: Detailed task description
-        status: Current task status
-        priority: Task priority level
-        created_at: Timestamp when task was created
-        updated_at: Timestamp when task was last updated
-        due_date: Optional deadline for the task
     """
 
     task_id: int
     title: str
     description: str = ""
     status: TaskStatus = TaskStatus.PENDING
-    priority: TaskPriority = TaskPriority.MEDIUM
+    # Nota: este default solo aplica si NO te pasan priority en el constructor.
+    priority: Union[TaskPriority, int, str, None] = TaskPriority.MEDIUM
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     due_date: Optional[datetime] = None
 
     def __post_init__(self):
-        """Validate task data after initialization."""
+        """Validate and normalize task data after initialization."""
+        # --- Normalización de priority ---
+        # Si viene como str / int, conviértelo a TaskPriority.
+        if isinstance(self.priority, str):
+            self.priority = TaskPriority[self.priority.upper()]
+        elif isinstance(self.priority, int):
+            self.priority = TaskPriority(self.priority)
+        elif self.priority is None:
+            self.priority = TaskPriority.MEDIUM
+        # A partir de aquí, priority SIEMPRE es TaskPriority.
+
         self.validate()
 
     def validate(self) -> None:
-        """
-        Validate task data.
-
-        Raises:
-            ValidationError: If validation fails
-        """
+        """Validate task data."""
         if not self.title or len(self.title.strip()) == 0:
             raise ValidationError("Title cannot be empty")
 
@@ -101,18 +97,9 @@ class Task:
         self.updated_at = datetime.now()
 
     def update_title(self, new_title: str) -> None:
-        """
-        Update task title.
-
-        Args:
-            new_title: New title for the task
-
-        Raises:
-            ValidationError: If title is invalid
-        """
+        """Update task title."""
         if not new_title or len(new_title.strip()) == 0:
             raise ValidationError("Title cannot be empty")
-
         if len(new_title) > 200:
             raise ValidationError("Title cannot exceed 200 characters")
 
@@ -124,21 +111,20 @@ class Task:
         self.description = new_description
         self.updated_at = datetime.now()
 
-    def set_priority(self, priority: TaskPriority) -> None:
-        """Set task priority."""
-        self.priority = priority
+    def set_priority(self, priority: Union[TaskPriority, str, int]) -> None:
+        """Set task priority (acepta enum, str o int)."""
+        if isinstance(priority, str):
+            self.priority = TaskPriority[priority.upper()]
+        elif isinstance(priority, int):
+            self.priority = TaskPriority(priority)
+        else:
+            self.priority = priority
         self.updated_at = datetime.now()
 
     def is_overdue(self) -> bool:
-        """
-        Check if task is overdue.
-
-        Returns:
-            True if task has a due date and it has passed, False otherwise
-        """
+        """Check if task is overdue."""
         if not self.due_date:
             return False
-
         return (
             datetime.now() > self.due_date
             and self.status != TaskStatus.COMPLETED
@@ -146,12 +132,7 @@ class Task:
         )
 
     def to_dict(self) -> dict:
-        """
-        Convert task to dictionary representation.
-
-        Returns:
-            Dictionary containing task data
-        """
+        """Convert task to dictionary representation."""
         return {
             "task_id": self.task_id,
             "title": self.title,
