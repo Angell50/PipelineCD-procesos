@@ -1,0 +1,180 @@
+version: 2.1
+
+orbs:
+  slack: circleci/slack@4.13.3  # (no lo usaremos ahora; útil si luego pasas a Slack)
+
+executors:
+  py:
+    parameters:
+      pyver:
+        type: string
+        default: "3.11"
+    docker:
+      - image: cimg/python:<<parameters.pyver>>
+    resource_class: small
+
+commands:
+  install-deps:
+    description: Crear venv e instalar deps (prod + dev)
+    steps:
+      - checkout
+      - run:
+          name: Crear venv
+          command: |
+            python -m venv .venv
+            . .venv/bin/activate
+            python -m pip install --upgrade pip
+      - restore_cache:
+          keys:
+            - v1-pip-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+            - v1-pip-{{ checksum "requirements.txt" }}
+            - v1-pip-
+      - run:
+          name: Instalar requirements
+          command: |
+            . .venv/bin/activate
+            pip install -r requirements.txt
+            if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - save_cache:
+          key: v1-pip-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+          paths:
+            - ~/.cache/pip
+      - run:
+          name: Mostrar versiones
+          command: |
+            . .venv/bin/activate
+            python --version
+            pip --version
+
+jobs:
+  lint:
+    executor:
+      name: py
+      pyver: "3.11"
+    steps:
+      - install-deps
+      - run:
+          name: Black (check) + isort (check)
+          command: |
+            . .venv/bin/activate
+            black --check src tests
+            isort --check-only src tests
+      - run:
+          name: flake8 + pylint (pylint no rompe build)
+          command: |
+            . .venv/bin/activate
+            flake8 src tests
+            pylint src || true
+      - store_artifacts:
+          path: .
+          destination: repo
+
+  pre_commit:
+    executor:
+      name: py
+      pyver: "3.11"
+    steps:
+      - install-deps
+      - run:
+          name: Ejecutar pre-commit
+          command: |
+            . .venv/bin/activate
+            pre-commit run --all-files
+
+  test:
+    parameters:
+      pyver:
+        type: string
+        default: "3.11"
+    executor:
+      name: py
+      pyver: << parameters.pyver >>
+    steps:
+      - install-deps
+      - run:
+          name: Pytest con coverage (mín 90%)
+          command: |
+            . .venv/bin/activate
+            mkdir -p test-results
+            pytest -q --maxfail=1 --disable-warnings --junitxml=test-results/junit.xml \
+              --cov=src --cov-report=term-missing --cov-report=xml --cov-report=html
+            # Enforce 90% de cobertura
+            python - <<'PY'
+import sys, xml.etree.ElementTree as ET
+root = ET.parse('coverage.xml').getroot()
+rate = float(root.get('line-rate', '0')) * 100
+print(f"Coverage: {rate:.2f}%")
+sys.exit(0 if rate >= 90.0 else 1)
+PY
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: htmlcov
+          destination: coverage-html
+      - store_artifacts:
+          path: coverage.xml
+          destination: coverage.xml
+
+  package:
+    executor:
+      name: py
+      pyver: "3.11"
+    steps:
+      - install-deps
+      - run:
+          name: Build (wheel + sdist)
+          command: |
+            . .venv/bin/activate
+            python -m pip install build
+            python -m build
+      - store_artifacts:
+          path: dist
+          destination: dist
+
+workflows:
+  pr_checks:
+    jobs:
+      - lint
+      - pre_commit:
+          requires:
+            - lint
+      - test:
+          name: test-3_10
+          pyver: "3.10"
+          requires:
+            - lint
+      - test:
+          name: test-3_11
+          pyver: "3.11"
+          requires:
+            - lint
+      # Puedes añadir 3.12 si quieres:
+      # - test:
+      #     name: test-3_12
+      #     pyver: "3.12"
+      #     requires:
+      #       - lint
+      - package:
+          requires:
+            - test-3_10
+            - test-3_11
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 5 * * *"   # 05:00 UTC diario en main
+          filters:
+            branches:
+              only: main
+    jobs:
+      - test:
+          pyver: "3.11"
+      - package:
+          requires:
+            - test
+
+  release_on_tag:
+    jobs:
+      - package
+    # Se ejecuta sólo al etiquetar vX.Y.Z
+    # (más adelante se puede añadir un deploy real)

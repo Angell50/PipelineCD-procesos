@@ -1,0 +1,24 @@
+# Core dependencies (none required for the app itself)
+
+# Testing dependencies
+pytest==8.0.0
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Code quality tools
+black==24.1.1
+flake8==7.0.0
+pylint==3.0.3
+isort==5.13.2
+mypy==1.8.0
+
+# Additional flake8 plugins
+flake8-bugbear==24.1.17
+flake8-comprehensions==3.14.0
+flake8-simplify==0.21.0
+
+# Pre-commit hooks
+pre-commit==3.6.0
+
+# Code coverage
+coverage[toml]==7.4.1

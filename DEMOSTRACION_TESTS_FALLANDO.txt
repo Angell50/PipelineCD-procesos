@@ -1,0 +1,259 @@
+================================================================================
+DEMOSTRACIÓN: TESTS FALLANDO
+================================================================================
+
+📌 ¿QUÉ HICIMOS?
+--------------------------------------------------------------------------------
+
+Modificamos INTENCIONALMENTE 3 tests para que fallen y así demostrar:
+
+1. ✅ Cómo se ven los tests cuando fallan
+2. ✅ Cómo pytest reporta los errores
+3. ✅ Cómo identificar y corregir las fallas
+4. ✅ El valor de tener tests automatizados
+
+
+📌 TESTS MODIFICADOS (3 FALLAS INTENCIONALES)
+--------------------------------------------------------------------------------
+
+FALLA #1: test_create_valid_task
+   Archivo: tests/test_task.py
+   Línea: 22
+   Error: Esperaba TaskPriority.HIGH pero obtiene TaskPriority.MEDIUM
+
+FALLA #2: test_update_title
+   Archivo: tests/test_task.py
+   Línea: 126
+   Error: Esperaba "Wrong Title" pero obtiene "Updated Title"
+
+FALLA #3: test_get_statistics_with_tasks
+   Archivo: tests/test_task_manager.py
+   Línea: 321
+   Error: Esperaba 75.0% pero obtiene 50.0%
+
+
+📌 RESULTADO ACTUAL
+--------------------------------------------------------------------------------
+
+Al ejecutar: pytest
+
+Resultado:
+   ✅ 58 tests PASARON
+   ❌ 3 tests FALLARON
+   📊 Tasa de éxito: 95.08%
+   ⏱️ Tiempo: 0.47 segundos
+   📈 Cobertura: 98.96% (se mantiene)
+
+
+📌 SALIDA DE PYTEST (SIMPLIFICADA)
+--------------------------------------------------------------------------------
+
+$ pytest -v
+
+tests/test_task.py::test_create_valid_task FAILED                  [  1%]
+tests/test_task.py::test_update_title FAILED                       [ 26%]
+tests/test_task_manager.py::test_get_statistics_with_tasks FAILED  [ 95%]
+
+================================== FAILURES ===================================
+
+___________________ TestTaskCreation.test_create_valid_task ___________________
+AssertionError: assert <TaskPriority.MEDIUM: 2> == <TaskPriority.HIGH: 3>
+
+______________________ TestTaskUpdates.test_update_title ______________________
+AssertionError: assert 'Updated Title' == 'Wrong Title'
+
+________________ TestStatistics.test_get_statistics_with_tasks ________________
+AssertionError: assert 50.0 == 75.0
+
+======================== 3 failed, 58 passed in 0.47s =========================
+
+
+📌 ¿POR QUÉ ES ÚTIL ESTA DEMOSTRACIÓN?
+--------------------------------------------------------------------------------
+
+1. DETECCIÓN TEMPRANA DE ERRORES
+   - Los tests encuentran problemas ANTES de producción
+   - Son más baratos de arreglar en desarrollo
+
+2. MENSAJES CLAROS
+   - pytest muestra EXACTAMENTE qué falló
+   - Indica el archivo y la línea
+   - Muestra valores esperados vs. valores reales
+
+3. REGRESIÓN
+   - Si alguien rompe el código en el futuro
+   - Los tests lo detectarán inmediatamente
+
+4. DOCUMENTACIÓN VIVA
+   - Los tests muestran cómo DEBE funcionar el código
+   - Son ejemplos ejecutables
+
+
+📌 EJEMPLO DE ERROR DETALLADO
+--------------------------------------------------------------------------------
+
+Test: test_get_statistics_with_tasks
+Ubicación: tests/test_task_manager.py:321
+
+Código:
+   assert stats["completion_rate"] == 75.0  # ❌ FALLA
+
+Error:
+   AssertionError: assert 50.0 == 75.0
+                        ^^^^^    ^^^^^
+                        Real   Esperado
+
+Contexto:
+   - 4 tareas creadas
+   - 2 tareas completadas
+   - Tasa real: 2/4 = 50% ✅ CORRECTO
+   - Test esperaba: 75% ❌ INCORRECTO
+
+
+📌 CÓMO LEER LOS ERRORES DE PYTEST
+--------------------------------------------------------------------------------
+
+Estructura de un error:
+
+1. NOMBRE DEL TEST
+   TestTaskCreation.test_create_valid_task
+
+2. UBICACIÓN
+   tests/test_task.py:22
+
+3. TIPO DE ERROR
+   AssertionError
+
+4. DETALLES
+   assert <valor_real> == <valor_esperado>
+
+5. CONTEXTO ADICIONAL
+   - Valores de las variables
+   - Líneas de código relevantes
+
+
+📌 ARCHIVOS CREADOS PARA LA DEMOSTRACIÓN
+--------------------------------------------------------------------------------
+
+1. EJEMPLO_TESTS_FALLANDO.md
+   - Explicación completa de cada falla
+   - Cómo interpretar los errores
+   - Tipos de errores comunes
+
+2. COMO_ARREGLAR_TESTS.md
+   - Instrucciones paso a paso para arreglar
+   - 3 métodos diferentes de corrección
+   - Verificación final
+
+3. DEMOSTRACION_TESTS_FALLANDO.txt
+   - Este archivo (resumen ejecutivo)
+
+
+📌 PARA ARREGLAR LOS TESTS
+--------------------------------------------------------------------------------
+
+OPCIÓN 1 - RÁPIDA:
+   Lee el archivo: COMO_ARREGLAR_TESTS.md
+   Sigue las instrucciones paso a paso
+
+OPCIÓN 2 - MANUAL:
+   1. Abre tests/test_task.py
+   2. Busca "FALLA INTENCIONAL"
+   3. Corrige las 2 líneas marcadas
+   4. Abre tests/test_task_manager.py
+   5. Busca "FALLA INTENCIONAL"
+   6. Corrige la línea marcada
+   7. Ejecuta: pytest
+
+OPCIÓN 3 - REVERTIR:
+   Si tienes Git configurado:
+   git checkout tests/test_task.py tests/test_task_manager.py
+
+
+📌 COMANDOS ÚTILES
+--------------------------------------------------------------------------------
+
+# Ver tests fallidos
+pytest
+
+# Ver con más detalle
+pytest -v
+
+# Ver solo las fallas
+pytest --tb=short
+
+# Detener en la primera falla
+pytest -x
+
+# Ejecutar solo un test específico
+pytest tests/test_task.py::TestTaskCreation::test_create_valid_task
+
+# Ver cobertura
+pytest --cov=src
+
+
+📌 LECCIONES APRENDIDAS
+--------------------------------------------------------------------------------
+
+✅ Los tests automatizados son ESENCIALES para calidad de código
+✅ pytest proporciona retroalimentación clara y útil
+✅ Es mejor detectar errores en desarrollo que en producción
+✅ Los tests deben pasar al 100% antes de hacer commit
+✅ La cobertura de código NO garantiza ausencia de bugs
+
+
+📌 EN UN PROYECTO REAL
+--------------------------------------------------------------------------------
+
+NUNCA DEBES:
+   ❌ Hacer commit con tests fallando
+   ❌ Ignorar las fallas de tests
+   ❌ Comentar tests que fallan
+   ❌ Desactivar tests "molestos"
+
+SIEMPRE DEBES:
+   ✅ Investigar por qué falla un test
+   ✅ Corregir el código O el test (según corresponda)
+   ✅ Mantener los tests actualizados
+   ✅ Agregar tests para bugs encontrados
+
+
+📌 ESTADÍSTICAS
+--------------------------------------------------------------------------------
+
+ESTADO ACTUAL (CON FALLAS):
+   Total de tests: 61
+   Pasaron: 58 (95.08%)
+   Fallaron: 3 (4.92%)
+   Cobertura: 98.96%
+
+ESTADO ORIGINAL (SIN FALLAS):
+   Total de tests: 61
+   Pasaron: 61 (100%)
+   Fallaron: 0 (0%)
+   Cobertura: 98.96%
+
+
+📌 SIGUIENTE PASO
+--------------------------------------------------------------------------------
+
+Para restaurar el proyecto a su estado perfecto:
+
+1. Lee: COMO_ARREGLAR_TESTS.md
+2. Corrige los 3 tests
+3. Ejecuta: pytest
+4. Verifica: 61 passed in X.XXs
+
+¡Y tendrás nuevamente un proyecto perfecto! ✅
+
+
+================================================================================
+FIN DE LA DEMOSTRACIÓN
+================================================================================
+
+Para más información:
+   - EJEMPLO_TESTS_FALLANDO.md     (explicación detallada)
+   - COMO_ARREGLAR_TESTS.md        (instrucciones de corrección)
+   - RESUMEN_ESPAÑOL.md            (documentación completa del proyecto)
+
+================================================================================

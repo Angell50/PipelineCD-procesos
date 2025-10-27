@@ -1,0 +1,192 @@
+================================================================================
+COMANDOS RÁPIDOS - GESTOR DE TAREAS
+================================================================================
+
+📌 EJECUTAR LA APLICACIÓN
+--------------------------------------------------------------------------------
+
+1. Aplicación Interactiva (RECOMENDADO):
+   python main.py
+
+2. Ver Ejemplo Demostrativo:
+   python ejemplo_simple.py
+
+3. Usar en tu propio script Python:
+   Crea un archivo .py e importa: from src.task_manager import TaskManager
+
+
+📌 TESTING (PRUEBAS)
+--------------------------------------------------------------------------------
+
+# Tests básicos
+pytest
+
+# Tests con detalles
+pytest -v
+
+# Tests con cobertura
+pytest --cov=src --cov-report=html
+
+# Ver reporte de cobertura (abre en navegador)
+htmlcov/index.html
+
+📌 ESTADO ACTUAL DE LOS TESTS ⚠️
+--------------------------------------------------------------------------------
+
+ATENCIÓN: Actualmente hay 3 tests fallando INTENCIONALMENTE para demostración
+
+Resultado actual:
+   ✅ 58 tests pasando
+   ❌ 3 tests fallando (intencional)
+   📊 95.08% de éxito
+
+Para ver la demostración:
+   - Lee: DEMOSTRACION_TESTS_FALLANDO.txt
+   - Lee: EJEMPLO_TESTS_FALLANDO.md
+
+Para arreglar los tests:
+   - Lee: COMO_ARREGLAR_TESTS.md
+   - Sigue las instrucciones paso a paso
+
+
+📌 CALIDAD DE CÓDIGO
+--------------------------------------------------------------------------------
+
+# Formatear código
+black src tests
+
+# Verificar estilo (Flake8)
+flake8 src tests
+
+# Analizar código (Pylint)
+pylint src
+
+# Ordenar imports
+isort src tests
+
+# Verificar tipos
+mypy src
+
+
+📌 COMANDOS CON MAKEFILE (SI TIENES MAKE)
+--------------------------------------------------------------------------------
+
+make test         # Ejecutar tests
+make coverage     # Tests con cobertura
+make lint         # Verificar calidad
+make format       # Formatear código
+make all          # Hacer todo (format + lint + test)
+make clean        # Limpiar archivos generados
+
+
+📌 INSTALACIÓN
+--------------------------------------------------------------------------------
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Instalar dependencias de desarrollo
+pip install -r requirements-dev.txt
+
+# Instalar pre-commit hooks
+pre-commit install
+
+
+📌 PRE-COMMIT HOOKS
+--------------------------------------------------------------------------------
+
+# Instalar hooks
+pre-commit install
+
+# Ejecutar manualmente
+pre-commit run --all-files
+
+
+📌 VERIFICACIÓN RÁPIDA
+--------------------------------------------------------------------------------
+
+# ¿Funciona todo?
+pytest && echo "TODO OK!"
+
+# ¿El código está bien?
+black --check src tests && flake8 src tests && pylint src
+
+
+📌 ARCHIVOS IMPORTANTES
+--------------------------------------------------------------------------------
+
+EJECUTABLES:
+- main.py                 # Aplicación interactiva
+- ejemplo_simple.py       # Ejemplo demostrativo
+- run_quality_checks.py   # Verificar calidad
+
+DOCUMENTACIÓN (ESPAÑOL):
+- COMO_EJECUTAR.md        # Guía de ejecución
+- RESUMEN_ESPAÑOL.md      # Resumen completo en español
+- COMANDOS_RAPIDOS.txt    # Este archivo
+
+DOCUMENTACIÓN (INGLÉS):
+- README.md               # Documentación principal
+- PROJECT_SUMMARY.md      # Resumen técnico
+
+CÓDIGO FUENTE:
+- src/task_manager/task.py           # Modelo de Tarea
+- src/task_manager/task_manager.py   # Gestor de Tareas
+- src/task_manager/exceptions.py     # Excepciones
+
+TESTS:
+- tests/test_task.py                 # Tests del modelo
+- tests/test_task_manager.py         # Tests del gestor
+
+
+📌 EJEMPLO RÁPIDO DE USO
+--------------------------------------------------------------------------------
+
+# En Python:
+from src.task_manager import TaskManager, TaskPriority
+
+manager = TaskManager()
+tarea = manager.add_task("Mi primera tarea", priority=TaskPriority.HIGH)
+manager.mark_task_completed(tarea.task_id)
+stats = manager.get_statistics()
+print(stats)
+
+
+📌 SOLUCIÓN DE PROBLEMAS
+--------------------------------------------------------------------------------
+
+Problema: "No module named 'src'"
+Solución: cd "C:\Users\ASUS GAMING\Desktop\Prcoesos Soft\PipeLine CD"
+
+Problema: "No module named 'pytest'"
+Solución: pip install -r requirements.txt
+
+Problema: Tests fallan
+Solución: Verifica que estés en la carpeta correcta con: cd
+
+
+📌 RESULTADOS ESPERADOS
+--------------------------------------------------------------------------------
+
+pytest          → 61 passed in X.XXs
+pytest --cov    → 98.96% coverage
+pylint src      → Your code has been rated at 10.00/10
+flake8 src      → (sin salida = 0 errores)
+black --check   → All done! ✨ 🍰 ✨
+
+
+📌 ESTRUCTURA DEL PROYECTO
+--------------------------------------------------------------------------------
+
+PipeLine CD/
+├── src/task_manager/      # Código fuente
+├── tests/                 # Pruebas
+├── main.py               # App interactiva ⭐
+├── ejemplo_simple.py     # Ejemplo demo ⭐
+├── COMO_EJECUTAR.md      # Guía en español ⭐
+└── requirements.txt      # Dependencias
+
+
+================================================================================
+FIN - Para más información lee COMO_EJECUTAR.md o RESUMEN_ESPAÑOL.md
+================================================================================
